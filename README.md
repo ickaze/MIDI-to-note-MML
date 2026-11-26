@@ -1,5 +1,7 @@
 # MIDI → note.x MML Studio
 
+[ブラウザで使う（GitHub Pages）](https://ickaze.github.io/MIDI-to-note-MML/)
+
 ブラウザでMIDIの指定チャンネルをnote.x / MXDRV向けMMLへ変換するツールです。外部ライブラリやインストールは不要で、MIDIの読み込み・変換・試聴をブラウザ内で行います。
 
 ## 使い方
