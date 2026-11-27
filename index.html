@@ -11,7 +11,7 @@
 <section class="card"><h2>2. 出力を設定</h2><label for="parts">使用パート（記載順に割り当て）</label><input id="parts" value="P-W" placeholder="例: P-W / P-U / A-H / P,R,T"><p class="hint">FM: A～H ／ 拡張PCM: P～W<br>空きがなければ、発音開始が最も古い音を終了します。</p>
 <label class="check"><input id="sustain" type="checkbox" checked><span>CC64のサステインを反映<br><span class="hint">64以上でオン。解除まで音を延長します。</span></span></label>
 <label class="check"><input id="retrigger" type="checkbox"><span>同音再発音の対策を行う<br><span class="hint">同じパートを再使用し、前の同音を1クロック早く切ります。オフなら対策前の動作です。</span></span></label>
-<label for="volumeOffset">相対音量オフセット（v値）</label><input id="volumeOffset" type="number" min="-15" max="15" step="1" value="-6"><p class="hint">変換時、全パートのv値に加算します。初期値-6（例: v12→v6）。結果は0～15に収めます。dB指定ではありません。変更後は再変換してください。</p><label for="quantize">クオンタイズ：最短音長</label><select id="quantize"><option value="0">無効（元MIDIの時刻を保持）</option><option value="4">4分音符</option><option value="8">8分音符</option><option value="12">8分三連符</option><option value="16">16分音符</option><option value="24">16分三連符</option><option value="32">32分音符</option><option value="48">32分三連符</option><option value="64">64分音符</option><option value="96">64分三連符</option><option value="192">192分音符（1クロック）</option></select><p class="hint">選択チャンネルの開始・終了時刻の補正量合計が最小になるよう、曲全体の開始を自動調整します（1クロック単位）。</p><label for="pdx">PDX名（PCM使用時・拡張子なし／省略可）</label><input id="pdx" placeholder="例: PIANO"><label for="bank">PCMバンク番号 @（0～255）</label><input id="bank" type="number" min="0" max="255" value="0"><p class="hint">PCMの音階→サンプル配置はPDX側で用意してください。FM出力は仮音色@0を同梱します。</p><button id="convert" class="primary" disabled>変換する</button></section>
+<label class="check"><input id="useLoop" type="checkbox"><span>ループマーカーを反映<span class="hint"><br>開始までを1回、開始～終了を繰り返します。MIDI／MML試聴にも反映します。初期値は無効です。</span></span></label><label for="volumeOffset">相対音量オフセット（v値）</label><input id="volumeOffset" type="number" min="-15" max="15" step="1" value="-6"><p class="hint">変換時、全パートのv値に加算します。初期値-6（例: v12→v6）。結果は0～15に収めます。dB指定ではありません。変更後は再変換してください。</p><label for="quantize">クオンタイズ：最短音長</label><select id="quantize"><option value="0">無効（元MIDIの時刻を保持）</option><option value="4">4分音符</option><option value="8">8分音符</option><option value="12">8分三連符</option><option value="16">16分音符</option><option value="24">16分三連符</option><option value="32">32分音符</option><option value="48">32分三連符</option><option value="64">64分音符</option><option value="96">64分三連符</option><option value="192">192分音符（1クロック）</option></select><p class="hint">選択チャンネルの開始・終了時刻の補正量合計が最小になるよう、曲全体の開始を自動調整します（1クロック単位）。</p><label for="pdx">PDX名（PCM使用時・拡張子なし／省略可）</label><input id="pdx" placeholder="例: PIANO"><label for="bank">PCMバンク番号 @（0～255）</label><input id="bank" type="number" min="0" max="255" value="0"><p class="hint">PCMの音階→サンプル配置はPDX側で用意してください。FM出力は仮音色@0を同梱します。</p><button id="convert" class="primary" disabled>変換する</button></section>
 </aside><div>
 <section class="card"><h2>3. 聴き比べ</h2><div class="row"><button id="playMidi" disabled>▶ MIDIチャンネル</button><button id="playMml" disabled>▶ 編集中のMML</button><button id="stop" disabled>■ 停止</button></div>
 <canvas id="roll" width="900" height="180" aria-label="選択チャンネルまたは再生中MMLのピアノロール"></canvas>
@@ -19,7 +19,7 @@
 <p class="hint">試聴はWeb Audioの簡易シンセです。MIDI側も選択チャンネルのみ。MML側は音数制限・ペダル・編集結果を反映します。原音色、PDX、リバーブ、コーラス、ピッチベンドは再現しません。</p>
 <div id="stats" class="stats"></div><div id="status" role="status" aria-live="polite">MIDIファイルを選んで開始してください。</div></section>
 <section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">4. MMLを編集・保存</h2><div class="row"><button id="save" disabled>MMLを保存</button><button id="saveMdx" class="primary" disabled>MDXを保存</button></div></div><textarea id="mml" spellcheck="false" aria-label="note.x MML"></textarea><p id="compile" class="hint">MDX直接保存はP～Wのみ対応。PDX名を指定して変換後、「MDXを保存」を押してください。対応PCMドライバとPDXは別途必要です。</p>
-<details><summary>仕様と使い方</summary><div class="hint"><p>保存したHTMLをブラウザで開いてください。ネット接続は不要です。MIDIを読み込み、チャンネル・パートを選び「変換する」を押すと、下のMMLを保存できます。設定変更後は再変換してください。</p><p>192クロック／全音符（4分音符48）へ絶対時刻を丸めます。MIDIのテンポ変更を保持し、長い音は&amp;で接続します。ベロシティはv1～v15に近似します。CC64以外のMIDIコントローラ、プログラム変更、ピッチベンドは出力しません。ペダルが最後までオンなら、ファイル終端まで延長します。</p><p>「同音再発音の対策」オンの場合は、同音が持続中ならそのパートを再利用します。元MIDIで長さ0の音や、丸め後に0クロックになる音は省略し、省略数を表示します。1クロックの無音を確保できない極端な連打は変換を中止して通知します。</p><p>クオンタイズ有効時は選択チャンネルのノート開始・終了の絶対補正量の合計を最小化します。1グリッド未満の範囲で整数クロックの開始シフトを全探索し、同点ならシフトの絶対値が小さい方を選びます。終了は開始より最低1グリッド後に配置します。ペダル延長後に処理し、元の長さ0の音は省略します。テンポ変更にも同じ開始シフトを適用し、最寄りのグリッドへ丸めます。曲末・テンポ変更位置もグリッドに揃え、音符と休符を指定音長以上の音長表記で出力します。同音再発音対策の隙間も1グリッドとします。直前の同音が1グリッドしかない場合は、その音長を保持し、隙間なしで次の音へ切り替えます。MIDI試聴側はクオンタイズしません。無効時もMMLの48 PPQへの丸めは必要です。</p><p>相対音量オフセットは変換時の全v値に加算し、0～15に収めます。初期値は-6です。元MIDI試聴には適用せず、MML試聴・MML保存・MDX保存には変換後の値を使います。MMLを手編集した後に保存する際、オフセットを重ねて加算することはありません。</p><p>「MDXを保存」は編集中のP～Wの生成MMLをブラウザ内でコンパイルします。PCM8宣言と16パートのデータを出力し、未使用FMパートは終了命令だけを格納します。@、t、v、q、p、o、音符・休符、%音長、通常音長、付点、同音の&amp;に対応します。FMパート・マクロ・ループ・相対オクターブなど未対応命令はエラーになります。PCM音符はPDXサンプル番号0～95（o0d+～o8d）として保存します。タイトル・PDX名は半角文字のみ対応です。OPMタイマーの分解能によりテンポには誤差があります。MDXの16ビットオフセットを超える大きさは出力しません。</p><p>MML試聴はこのツールが出力する書式に対応します（音符、休符、%、音長分母、付点、&amp;、^、o、&lt;&gt;、t、q、v、@、p）。マクロ・ループ・LFOなどは非対応です。未対応の命令はエラーにして知らせます。MML音符は音高として試聴し、PCMサンプル番号の挙動は模擬しません。</p><p>note.x実機でのコンパイル・再生は未確認です。FMのo4cをMIDI60として扱います。MMLやMIDIはサーバーへ送信されません。</p></div></details></section>
+<details><summary>仕様と使い方</summary><div class="hint"><p>保存したHTMLをブラウザで開いてください。ネット接続は不要です。MIDIを読み込み、チャンネル・パートを選び「変換する」を押すと、下のMMLを保存できます。設定変更後は再変換してください。</p><p>192クロック／全音符（4分音符48）へ絶対時刻を丸めます。MIDIのテンポ変更を保持し、長い音は&amp;で接続します。ベロシティはv1～v15に近似します。CC64以外のMIDIコントローラ、プログラム変更、ピッチベンドは出力しません。ペダルが最後までオンなら、ファイル終端まで延長します。</p><p>「同音再発音の対策」オンの場合は、同音が持続中ならそのパートを再利用します。元MIDIで長さ0の音や、丸め後に0クロックになる音は省略し、省略数を表示します。1クロックの無音を確保できない極端な連打は変換を中止して通知します。</p><p>クオンタイズ有効時は選択チャンネルのノート開始・終了の絶対補正量の合計を最小化します。1グリッド未満の範囲で整数クロックの開始シフトを全探索し、同点ならシフトの絶対値が小さい方を選びます。終了は開始より最低1グリッド後に配置します。ペダル延長後に処理し、元の長さ0の音は省略します。テンポ変更にも同じ開始シフトを適用し、最寄りのグリッドへ丸めます。曲末・テンポ変更位置もグリッドに揃え、音符と休符を指定音長以上の音長表記で出力します。同音再発音対策の隙間も1グリッドとします。直前の同音が1グリッドしかない場合は、その音長を保持し、隙間なしで次の音へ切り替えます。MIDI試聴側はクオンタイズしません。無効時もMMLの48 PPQへの丸めは必要です。</p><p>ループ反映は初期値オフです。オンの場合、MIDIのマーカー「Loop n: start」「Loop n: infinite end」の1組を読み、開始までを1回、開始～終了を繰り返します。同じ位置の重複マーカーはまとめます。複数ID・異なる位置の重複・開始終了の欠落はエラーです。ループなしの曲は通常変換します。MMLは全パートの同じ位置にLを置き、終了マーカー以後は出力しません。MDXはLへ戻る相対ジャンプを格納します。クオンタイズ時は境界にも開始シフトとグリッド補正を適用します。境界をまたぐ音は開始位置で分割・再発音し、終了位置で切ります。MIDI試聴は元の境界、MML試聴は補正後の境界で無限ループし、停止ボタンで終了できます。</p><p>相対音量オフセットは変換時の全v値に加算し、0～15に収めます。初期値は-6です。元MIDI試聴には適用せず、MML試聴・MML保存・MDX保存には変換後の値を使います。MMLを手編集した後に保存する際、オフセットを重ねて加算することはありません。</p><p>「MDXを保存」は編集中のP～Wの生成MMLをブラウザ内でコンパイルします。PCM8宣言と16パートのデータを出力し、未使用FMパートは終了命令だけを格納します。@、t、v、q、p、o、音符・休符、%音長、通常音長、付点、同音の&amp;、無限ループ開始Lに対応します。FMパート・マクロ・有限ループ・相対オクターブなど未対応命令はエラーになります。PCM音符はPDXサンプル番号0～95（o0d+～o8d）として保存します。タイトル・PDX名は半角文字のみ対応です。OPMタイマーの分解能によりテンポには誤差があります。MDXの16ビットオフセットを超える大きさは出力しません。</p><p>MML試聴はこのツールが出力する書式に対応します（音符、休符、%、音長分母、付点、&amp;、^、o、&lt;&gt;、t、q、v、@、p）。マクロ・有限ループ・LFOなどは非対応です。未対応の命令はエラーにして知らせます。MML音符は音高として試聴し、PCMサンプル番号の挙動は模擬しません。</p><p>note.x実機でのコンパイル・再生は未確認です。FMのo4cをMIDI60として扱います。MMLやMIDIはサーバーへ送信されません。</p></div></details></section>
 </div></div><footer>note.x / MXDRV用。試聴音色と実際のPCM・FM音色は異なります。</footer></main>
 <script id="core">
 'use strict';
@@ -29,11 +29,11 @@ function readMidi(buffer){
  const u8=()=>{need(1);return b[p++];},u16=()=>u8()*256+u8(),u32=()=>u16()*65536+u16(),str=n=>{need(n);let s='';while(n--)s+=String.fromCharCode(b[p++]);return s;};
  const vlq=()=>{let n=0;for(let k=0;k<4;k++){let c=u8();n=n*128+(c&127);if(!(c&128))return n;}throw Error('不正なVLQ');};
  if(str(4)!=='MThd')throw Error('SMF MIDIではありません');const h=u32();if(h<6)throw Error('MIDIヘッダーが不正です');const format=u16(),tracks=u16(),ppq=u16();if(format>1)throw Error('Format 2には対応していません');if(!ppq||(ppq&32768))throw Error('SMPTE時間形式には対応していません');need(h-6);p+=h-6;
- const ev=[];let serial=0,total=0;
+ const ev=[],markers=[];let serial=0,total=0;
  for(let tr=0;tr<tracks;tr++){
   if(str(4)!=='MTrk')throw Error('MTrkが見つかりません');const len=u32();need(len);const end=p+len;let tick=0,running=0;
   while(p<end){tick+=vlq();let s=u8();if(s<128){if(!running)throw Error('Running statusが不正です');p--;s=running;}
-   if(s===255){running=0;const type=u8(),n=vlq();need(n);if(p+n>end)throw Error('メタイベント長が不正です');if(type===81&&n===3){const us=b[p]*65536+b[p+1]*256+b[p+2];if(!us)throw Error('テンポが0です');ev.push({tick,type:'tempo',us,order:serial++});}p+=n;if(type===47){p=end;break;}}
+   if(s===255){running=0;const type=u8(),n=vlq();need(n);if(p+n>end)throw Error('メタイベント長が不正です');if(type===6){let text='';for(let j=0;j<n;j++)text+=String.fromCharCode(b[p+j]);markers.push({tick,text});}if(type===81&&n===3){const us=b[p]*65536+b[p+1]*256+b[p+2];if(!us)throw Error('テンポが0です');ev.push({tick,type:'tempo',us,order:serial++});}p+=n;if(type===47){p=end;break;}}
    else if(s===240||s===247){running=0;const n=vlq();need(n);if(p+n>end)throw Error('SysEx長が不正です');p+=n;}
    else if(s>=128&&s<240){running=s;const hi=s&240,ch=s&15,a=u8(),d=hi===192||hi===208?null:u8();if(a>127||d>127)throw Error('MIDIデータ値が不正です');if(hi===144||hi===128)ev.push({tick,ch,type:hi===128||!d?'off':'on',pitch:a,velocity:d,order:serial++});else if(hi===176)ev.push({tick,ch,type:'cc',cc:a,value:d,order:serial++});}
    else throw Error('未対応のMIDIステータスです');
@@ -48,8 +48,23 @@ function readMidi(buffer){
   else if(e.type==='cc'){if(e.cc===64)c.pedal.push({tick:e.tick,value:e.value});if(e.cc===120||e.cc===123){for(const [k,q]of active)if(k.startsWith(e.ch+':'))while(q.length)q.shift().end=e.tick;}}
  }
  for(const c of channels)for(const n of c.notes)if(n.end===null){n.end=total;c.unclosed++;}
- return {format,tracks,ppq,total,tempos,channels};
+ return {format,tracks,ppq,total,tempos,channels,markers};
 }
+function resolveLoop(midi){
+ const groups=new Map();for(const marker of midi.markers||[]){const m=marker.text.trim().match(/^Loop\s+(\d+)\s*:\s*(start|infinite\s+end)$/i);if(!m)continue;const id=+m[1];if(!groups.has(id))groups.set(id,{id,starts:new Set(),ends:new Set()});groups.get(id)[/^start$/i.test(m[2])?'starts':'ends'].add(marker.tick);}
+ if(!groups.size)return null;if(groups.size!==1)throw Error('複数・入れ子のループIDには対応していません');const g=[...groups.values()][0];if(g.starts.size!==1||g.ends.size!==1)throw Error('ループ開始・終了マーカーの組が不正です');const start=[...g.starts][0],end=[...g.ends][0];if(end<=start||end>midi.total)throw Error('ループ区間の長さ・位置が不正です');return {id:g.id,start,end};
+}
+function previewPosition(track,from,elapsed){
+ const end=track.loop?.end??track.duration,pos=from+Math.max(0,elapsed);if(!track.loop||pos<end)return Math.min(end,pos);return track.loop.start+(pos-end)%(end-track.loop.start);
+}
+function previewEvents(track,from,low,high){
+ const out=[],end=track.loop?.end??track.duration,firstLength=end-from;
+ function add(begin,finish,base){for(const n of track.notes){if(n.start>=finish||n.end<=begin)continue;const start=base+Math.max(begin,n.start)-begin,stop=base+Math.min(finish,n.end)-begin;if(start>=low-1e-9&&start<high-1e-9&&stop>start)out.push({...n,start,end:stop});}}
+ if(low<firstLength)add(from,end,0);
+ if(track.loop){const length=end-track.loop.start;if(!(length>0))throw Error('試聴ループ長が0です');for(let cycle=Math.max(0,Math.floor((low-firstLength)/length));firstLength+cycle*length<high;cycle++)add(track.loop.start,end,firstLength+cycle*length);}
+ return out;
+}
+
 function getNotes(midi,ch,sustain){
  const c=midi.channels[ch];return c.notes.map(n=>{let end=n.end;if(sustain){let on=false;for(const e of c.pedal){if(e.tick>end)break;on=e.value>=64;}if(on)end=c.pedal.find(e=>e.tick>=end&&e.value<64)?.tick??midi.total;}return {...n,end};}).sort((a,b)=>a.start-b.start||a.pitch-b.pitch);
 }
@@ -99,8 +114,14 @@ function generate(midi,ch,opts){
  const denominator=Number(opts.quantize||0);if(denominator&&![4,8,12,16,24,32,48,64,96,192].includes(denominator))throw Error('クオンタイズ音長が不正です');
  const quantization=denominator?quantizeNotes(original,192/denominator):null;
  const quantized=quantization?quantization.notes:original.map(n=>({...n,start:Math.round(n.start),end:Math.round(n.end)}));
- const notes=quantized.filter(n=>n.end>n.start),skipped=raw.length-notes.length,shift=quantization?.shift||0;
- const grid=quantization?.grid||1,rawTotal=Math.max(Math.max(0,Math.round(midi.total*48/midi.ppq+shift)),...notes.map(n=>n.end)),total=quantization?Math.ceil(rawTotal/grid)*grid:rawTotal,allocation=allocate(notes,ps.length,opts.retrigger,grid,!!quantization);
+ let notes=quantized.filter(n=>n.end>n.start);const skipped=raw.length-notes.length,shift=quantization?.shift||0;
+ const grid=quantization?.grid||1,rawTotal=Math.max(Math.max(0,Math.round(midi.total*48/midi.ppq+shift)),...notes.map(n=>n.end)),sourceLoop=opts.useLoop?resolveLoop(midi):null;
+ const loop=sourceLoop?{id:sourceLoop.id,start:Math.max(0,Math.round((sourceLoop.start*48/midi.ppq+shift)/grid)*grid),end:Math.max(0,Math.round((sourceLoop.end*48/midi.ppq+shift)/grid)*grid)}:null;
+ if(loop)loop.end=Math.max(loop.start+grid,loop.end);
+ const total=loop?loop.end:quantization?Math.ceil(rawTotal/grid)*grid:rawTotal;
+ if(loop)notes=notes.filter(n=>n.start<loop.end).map(n=>({...n,end:Math.min(n.end,loop.end)}));
+ const allocation=allocate(notes,ps.length,opts.retrigger,grid,!!quantization);
+ if(loop)allocation.voices=allocation.voices.map(voice=>voice.flatMap(n=>n.start<loop.start&&n.end>loop.start?[{...n,end:loop.start},{...n,start:loop.start}]:[n]));
  const tempos=[];for(const t of midi.tempos){const v={tick:Math.max(0,Math.round((t.tick*48/midi.ppq+shift)/grid)*grid),bpm:Math.max(1,Math.round(60000000/t.us))};if(v.bpm>255)throw Error('テンポが255 BPMを超えています。note.x用にテンポを調整してください');if(tempos.at(-1)?.tick===v.tick)tempos[tempos.length-1]=v;else tempos.push(v);}
  if(tempos[0].tick>0)tempos.unshift({...tempos[0],tick:0});
  const volumeOffset=opts.volumeOffset===undefined?-6:Number(opts.volumeOffset);if(opts.volumeOffset===''||!Number.isInteger(volumeOffset)||volumeOffset < -15||volumeOffset > 15)throw Error('相対音量オフセットは-15～15の整数で指定してください');
@@ -109,35 +130,38 @@ function generate(midi,ch,opts){
  const lines=['/* Generated by MIDI to note.x MML Studio */',`/* MIDI channel ${ch+1}; parts ${ps.join(',')}; sustain ${opts.sustain?'on':'off'} */`,`/* Voice steals ${allocation.stolen}; same-pitch retriggers ${allocation.retriggers}; zero-clock notes skipped ${skipped} */`,'#title "MIDI channel '+(ch+1)+'"'];
  lines.push('/* Relative volume offset '+volumeOffset+' (v steps, clamped to 0..15) */');
  if(quantization)lines.push(`/* Quantize 1/${denominator}; shift ${shift} clocks; mean endpoint correction ${quantization.mean.toFixed(4)} clocks */`);
+ if(loop)lines.push(`/* Loop ${loop.id}: ${loop.start}..${loop.end} clocks; notes crossing start are retriggered */`);
  if(pdx)lines.push('#pcmfile "'+pdx.replace(/\.pdx$/i,'')+'"');
  if(ps.some(p=>p>='P'))lines.push('/* Extended PCM: compile with note -p. Supply matching PDX samples. */');
  if(ps.some(p=>p<='H'))lines.push('@0 = {','31,0,0,15,0,127,0,1,0,0,0,','31,0,0,15,0,127,0,1,0,0,0,','31,0,0,15,0,127,0,1,0,0,0,','31,0,0,15,0,0,0,1,0,0,0,','7,0,15','}');
  lines.push('');
  allocation.voices.forEach((voice,i)=>{
-  const tokens=['@'+(ps[i]<='H'?0:bank),'q8','p3'];let cursor=0,ti=0;
-  function segment(name,start,end){let at=start;while(at<end){while(ti<tempos.length&&tempos[ti].tick<=at)tokens.push('t'+tempos[ti++].bpm);const next=Math.min(end,at+192,ti<tempos.length?tempos[ti].tick:Infinity);if(next<=at)throw Error('Tempo split');tokens.push(quantization?musicalLength(name,next-at,grid):name+'%'+(next-at));at=next;if(at<end&&name!=='r')tokens.push('&');}}
-  for(const n of voice){if(n.start>cursor)segment('r',cursor,n.start);tokens.push('v'+Math.max(0,Math.min(15,Math.max(1,Math.round(n.velocity*15/127))+volumeOffset)),'o'+(Math.floor(n.pitch/12)-1));if(n.pitch<12||n.pitch>119)throw Error('note.xのo0～o8で表せない音程があります');segment(names[n.pitch%12],n.start,n.end);cursor=n.end;}
+  const init=['@'+(ps[i]<='H'?0:bank),'q8','p3'],tokens=[...init];let cursor=0,ti=0,loopWritten=false;
+  function loopPoint(at){if(loop&&!loopWritten&&at===loop.start){let bpm=tempos[0].bpm;for(const t of tempos){if(t.tick>at)break;bpm=t.bpm;}tokens.push('L',...init,'t'+bpm);loopWritten=true;}}
+  function segment(name,start,end){let at=start;while(at<end){loopPoint(at);while(ti<tempos.length&&tempos[ti].tick<=at)tokens.push('t'+tempos[ti++].bpm);const next=Math.min(end,at+192,ti<tempos.length?tempos[ti].tick:Infinity,loop&&!loopWritten&&loop.start>at?loop.start:Infinity);if(next<=at)throw Error('Tempo split');tokens.push(quantization?musicalLength(name,next-at,grid):name+'%'+(next-at));at=next;if(at<end&&name!=='r')tokens.push('&');}}
+  for(const n of voice){if(n.start>cursor)segment('r',cursor,n.start);loopPoint(n.start);tokens.push('v'+Math.max(0,Math.min(15,Math.max(1,Math.round(n.velocity*15/127))+volumeOffset)),'o'+(Math.floor(n.pitch/12)-1));if(n.pitch<12||n.pitch>119)throw Error('note.xのo0～o8で表せない音程があります');segment(names[n.pitch%12],n.start,n.end);cursor=n.end;}
   if(cursor<total)segment('r',cursor,total);let row=ps[i]+' ';for(const token of tokens){if(row.length+token.length>108){lines.push(row.trimEnd());row=ps[i]+' ';}row+=token+' ';}lines.push(row.trimEnd(),'');
  });
- return {text:lines.join('\r\n')+'\r\n',...allocation,parts:ps,total,tempos,notes:notes.length,skipped,quantization,volumeOffset,rounded:raw.filter(n=>(n.start*48/midi.ppq)%1||(n.end*48/midi.ppq)%1).length};
+ return {text:lines.join('\r\n')+'\r\n',...allocation,parts:ps,total,tempos,notes:allocation.voices.reduce((sum,v)=>sum+v.length,0),loop,skipped,quantization,volumeOffset,rounded:raw.filter(n=>(n.start*48/midi.ppq)%1||(n.end*48/midi.ppq)%1).length};
 }
 function parseMml(text){
  let s=text.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/[^\n]*/g,'');s=s.replace(/^\s*@\d+\s*=\s*\{[^}]*\}/gm,'');const streams=new Map();
  for(const line of s.split(/\r?\n/)){const t=line.trim();if(!t||t.startsWith('#'))continue;const m=t.match(/^([A-HP-W]+)\s+(.*)$/);if(!m)throw Error('試聴で解釈できないMML行: '+t.slice(0,55));for(const part of m[1])streams.set(part,(streams.get(part)||'')+' '+m[2]);}
- if(!streams.size)throw Error('MMLにパートがありません');const notes=[],tempos=[];let total=0;
- for(const [part,src]of streams){let p=0,time=0,oct=4,vel=100,q=8,def=48,join=false,prev=null;
+ if(!streams.size)throw Error('MMLにパートがありません');const notes=[],tempos=[],partLoops=[];let total=0;
+ for(const [part,src]of streams){let p=0,time=0,oct=4,vel=100,q=8,def=48,join=false,prev=null,loopStart=null;
   const len=()=>{let m=src.slice(p).match(/^(%?)(\d+)?(\.*)/);p+=m[0].length;let v=m[2]?(m[1]?+m[2]:192/+m[2]):def;if(!v||!Number.isFinite(v))throw Error('MML音長が不正です');let x=v;for(let k=0;k<m[3].length;k++){x/=2;v+=x;}return v;};
-  while(p<src.length){if(/\s/.test(src[p])){p++;continue;}const rest=src.slice(p);let m;
+  while(p<src.length){if(src[p]==='L'){if(loopStart!==null||join)throw Error('MMLループ位置が不正です');loopStart=time;p++;continue;}if(/\s/.test(src[p])){p++;continue;}const rest=src.slice(p);let m;
    if((m=rest.match(/^(@v|@|t|v|q|p|o|l)(\d+)/i))){p+=m[0].length;const cmd=m[1].toLowerCase(),n=+m[2];if(cmd==='o'){if(n>8)throw Error('オクターブが範囲外です');oct=n;}if(cmd==='t'){if(!n)throw Error('テンポが0です');tempos.push({tick:time,us:60000000/n,part});}if(cmd==='v')vel=Math.max(1,Math.min(127,n/15*127));if(cmd==='q'){if(n<1||n>8)throw Error('qは1～8です');q=n;}if(cmd==='l'){if(!n)throw Error('lが0です');def=192/n;}continue;}
    if(src[p]==='<'||src[p]==='>'){oct+=src[p++]==='>'?1:-1;continue;}
    if(src[p]==='&'){join=true;p++;continue;}
    if(src[p]==='^'){p++;const n=len();if(!prev)throw Error('^の前に音符がありません');prev.end+=n;time+=n;continue;}
    if((m=rest.match(/^([a-gr])([+#-]?)/i))){p+=m[0].length;const name=m[1].toLowerCase(),n=len();if(name!=='r'){const pitch=(oct+1)*12+{c:0,d:2,e:4,f:5,g:7,a:9,b:11}[name]+(m[2]==='-'?-1:m[2]?1:0);if(join){if(!prev||prev.pitch!==pitch||Math.abs(prev.end-time)>1e-6)throw Error('試聴の&は同音の接続のみ対応します');prev.end=time+n*q/8;}else{prev={pitch,velocity:vel,start:time,end:time+n*q/8,part};notes.push(prev);}}else if(join)throw Error('休符は&で接続できません');time+=n;join=false;continue;}
    throw Error('試聴未対応のMML: '+rest.slice(0,28));
-  }if(join)throw Error('&の後に音符がありません');total=Math.max(total,time);
+  }if(join)throw Error('&の後に音符がありません');total=Math.max(total,time);partLoops.push({part,start:loopStart,end:time});
  }
  const unique=new Map();for(const t of tempos){if(unique.has(t.tick)&&Math.abs(unique.get(t.tick).us-t.us)>0.01)throw Error('同時刻に異なるテンポがあります');unique.set(t.tick,t);}if(!unique.has(0))unique.set(0,{tick:0,us:500000});
- return {notes,total,ppq:48,tempos:[...unique.values()].sort((a,b)=>a.tick-b.tick)};
+ let loop=null;const activeLoops=partLoops.filter(p=>p.start!==null);if(activeLoops.length){const first=activeLoops[0];if(activeLoops.length!==partLoops.length||first.end<=first.start||activeLoops.some(p=>p.start!==first.start||p.end!==first.end))throw Error('各パートのループ境界が一致していません');loop={start:first.start,end:first.end};}
+ return {notes,total,loop,ppq:48,tempos:[...unique.values()].sort((a,b)=>a.tick-b.tick)};
 }
 // MDX binary writer for the PCM-only MML subset generated by this application.
 // Implemented here from the file/command format; no external compiler is bundled.
@@ -153,13 +177,13 @@ function compilePcmMdx(text){
  if(!streams.size)throw Error('MDXに出力するP～Wパートがありません');
  for(const [label,value]of [['タイトル',title],['PDX名',pdx]])if(!/^[\x20-\x7e]*$/.test(value))throw Error('MDXの'+label+'は半角英数字・記号で指定してください（Shift_JISの日本語入力は未対応）');
  if(/[\\/:*?"<>|]/.test(pdx))throw Error('PDX名にファイル名として使えない文字があります');
- const tracks=Array.from({length:16},()=>[0xf1,0]),durations={},tempoMap=new Map();let noteCount=0;
+ const tracks=Array.from({length:16},()=>[0xf1,0]),durations={},loopPoints={},tempoMap=new Map();let noteCount=0;
  // FM A is an initialization track: enable eight PCM channels before P-W run.
  tracks[0]=[0xe8,0xf1,0];
  for(const [part,source]of streams){
-  const atoms=[];let p=0,time=0,oct=4,lastNote=null,awaitTie=false;
+  const atoms=[];let p=0,time=0,oct=4,lastNote=null,awaitTie=false,loopTime=null;
   function readLength(){const m=source.slice(p).match(/^(?:%(\d+)|(\d+)(\.*))/);if(!m)throw Error('MDX出力では音長を明示してください: '+source.slice(p,20));p+=m[0].length;const length=m[1]?+m[1]:192/+m[2]*(2-1/2**m[3].length);if(!Number.isInteger(length)||length<1)throw Error('MDX音長は1クロック以上の整数が必要です');return length;}
-  while(p<source.length){if(/\s/.test(source[p])){p++;continue;}const rest=source.slice(p);let m;
+  while(p<source.length){if(source[p]==='L'){if(loopTime!==null||awaitTie)throw Error('MDXループ位置が不正です');loopTime=time;atoms.push({kind:'loop'});lastNote=null;p++;continue;}if(/\s/.test(source[p])){p++;continue;}const rest=source.slice(p);let m;
    if((m=rest.match(/^(@|t|v|q|p|o)(\d+)/i))){p+=m[0].length;const cmd=m[1].toLowerCase(),n=+m[2];let bytes;
     if(cmd==='o'){if(n>8)throw Error('MDXオクターブはo0～o8です');oct=n;continue;}
     if(cmd==='@'){if(n>255)throw Error('PCMバンクは0～255です');bytes=[0xfd,n];}
@@ -178,44 +202,58 @@ function compilePcmMdx(text){
    throw Error('MDX出力で未対応のMML: '+rest.slice(0,30));
   }
   if(awaitTie)throw Error('MDXの&の後に音符がありません');
-  const bytes=[];for(const a of atoms){if(a.kind==='command')bytes.push(...a.bytes);else if(a.kind==='rest'){let remaining=a.length;while(remaining){const n=Math.min(128,remaining);bytes.push(n-1);remaining-=n;}}else{let remaining=a.length;while(remaining){const n=Math.min(256,remaining);if(remaining>n||a.tie)bytes.push(0xf7);bytes.push(0x80+a.index,n-1);remaining-=n;}}}
-  bytes.push(0xf1,0);tracks[8+part.charCodeAt(0)-80]=bytes;durations[part]=time;
+  const bytes=[];let loopOffset=null;for(const a of atoms){if(a.kind==='loop'){loopOffset=bytes.length;continue;}if(a.kind==='command')bytes.push(...a.bytes);else if(a.kind==='rest'){let remaining=a.length;while(remaining){const n=Math.min(128,remaining);bytes.push(n-1);remaining-=n;}}else{let remaining=a.length;while(remaining){const n=Math.min(256,remaining);if(remaining>n||a.tie)bytes.push(0xf7);bytes.push(0x80+a.index,n-1);remaining-=n;}}}
+  if(loopOffset!==null){if(time<=loopTime)throw Error('MDXループ長が0です');const offset=loopOffset-(bytes.length+3);if(offset< -32768)throw Error('MDXのループ区間が相対オフセット上限を超えています');bytes.push(0xf1,(offset>>8)&255,offset&255);loopPoints[part]={start:loopTime,end:time};}else bytes.push(0xf1,0);tracks[8+part.charCodeAt(0)-80]=bytes;durations[part]=time;
  }
+ const activeLoops=Object.values(loopPoints);if(activeLoops.length&&(activeLoops.length!==streams.size||activeLoops.some(l=>l.start!==activeLoops[0].start||l.end!==activeLoops[0].end)))throw Error('MDX各パートのループ境界が一致していません');
  const prefix=[...Array.from(title,c=>c.charCodeAt(0)),13,10,26,...Array.from(pdx,c=>c.charCodeAt(0)),0];
  let relative=34;const offsets=[];for(const t of tracks){offsets.push(relative);relative+=t.length;}
  if(relative>65535)throw Error('MDXのオフセット上限（65535バイト）を超えました。曲を短くしてください');
  const bytes=new Uint8Array(prefix.length+relative);bytes.set(prefix);const base=prefix.length,word=(at,n)=>{bytes[at]=n>>8;bytes[at+1]=n&255;};word(base,relative);offsets.forEach((n,i)=>word(base+2+i*2,n));tracks.forEach((t,i)=>bytes.set(t,base+offsets[i]));
- return {bytes,title,pdx,parts:[...streams.keys()],noteCount,durations,tempoCount:tempoMap.size};
+ return {bytes,title,pdx,parts:[...streams.keys()],noteCount,durations,tempoCount:tempoMap.size,loopPoints};
 }
 
-function secondsTrack(track){const tempos=track.tempos.map(x=>({...x})).sort((a,b)=>a.tick-b.tick);let sec=0;for(let i=0;i<tempos.length;i++){if(i)sec+=(tempos[i].tick-tempos[i-1].tick)/track.ppq*tempos[i-1].us/1e6;tempos[i].sec=sec;}function at(t){let lo=0,hi=tempos.length-1;while(lo<hi){const m=Math.ceil((lo+hi)/2);if(tempos[m].tick<=t)lo=m;else hi=m-1;}const e=tempos[lo];return e.sec+(t-e.tick)/track.ppq*e.us/1e6;}return {notes:track.notes.map(n=>({...n,start:at(n.start),end:at(n.end)})).sort((a,b)=>a.start-b.start),duration:at(track.total)};}
-return {readMidi,getNotes,parts,allocate,quantizeNotes,generate,parseMml,compilePcmMdx,secondsTrack};
+function secondsTrack(track){const tempos=track.tempos.map(x=>({...x})).sort((a,b)=>a.tick-b.tick);let sec=0;for(let i=0;i<tempos.length;i++){if(i)sec+=(tempos[i].tick-tempos[i-1].tick)/track.ppq*tempos[i-1].us/1e6;tempos[i].sec=sec;}function at(t){let lo=0,hi=tempos.length-1;while(lo<hi){const m=Math.ceil((lo+hi)/2);if(tempos[m].tick<=t)lo=m;else hi=m-1;}const e=tempos[lo];return e.sec+(t-e.tick)/track.ppq*e.us/1e6;}return {notes:track.notes.map(n=>({...n,start:at(n.start),end:at(n.end)})).sort((a,b)=>a.start-b.start),duration:at(track.total),loop:track.loop?{start:at(track.loop.start),end:at(track.loop.end)}:null};}
+return {readMidi,resolveLoop,previewPosition,previewEvents,getNotes,parts,allocate,quantizeNotes,generate,parseMml,compilePcmMdx,secondsTrack};
 })();
 </script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);let midi=null,result=null,audio=null,master=null,playback=null,display=null,raf=0,loadSerial=0,playSerial=0;
 const status=(s,error=false)=>{$('status').textContent=s;$('status').className=error?'error':'';};
-function midiTrack(){if(!midi)throw Error('MIDIを選択してください');return Core.secondsTrack({notes:Core.getNotes(midi,+$('channel').value,$('sustain').checked),ppq:midi.ppq,total:midi.total,tempos:midi.tempos});}
+function midiTrack(){if(!midi)throw Error('MIDIを選択してください');const loop=$('useLoop').checked?Core.resolveLoop(midi):null;let notes=Core.getNotes(midi,+$('channel').value,$('sustain').checked);if(loop)notes=notes.filter(n=>n.start<loop.end).map(n=>({...n,end:Math.min(n.end,loop.end)}));return Core.secondsTrack({notes,ppq:midi.ppq,total:loop?loop.end:midi.total,tempos:midi.tempos,loop});}
 function fmt(s){s=Math.max(0,s||0);return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
 function setDisplay(t){display=t;$('seek').max=t.duration||1;$('seek').value=0;$('clock').textContent='0:00 / '+fmt(t.duration);draw(0);}
 function draw(pos){const c=$('roll'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);if(!display)return;const ns=display.notes;if(!ns.length)return;const low=Math.min(...ns.map(n=>n.pitch))-2,high=Math.max(...ns.map(n=>n.pitch))+2,unit=h/(high-low+1),scale=w/Math.max(display.duration,.1);for(let n=low;n<=high;n++){ctx.fillStyle=[1,3,6,8,10].includes((n%12+12)%12)?'#171e2a':'#202937';ctx.fillRect(0,h-(n-low+1)*unit,w,unit-1);}ctx.fillStyle='#75dfc1';for(const n of ns)ctx.fillRect(n.start*scale,h-(n.pitch-low+1)*unit,Math.max(1,(n.end-n.start)*scale),Math.max(2,unit-2));ctx.strokeStyle='#ffcf86';ctx.beginPath();ctx.moveTo(pos*scale,0);ctx.lineTo(pos*scale,h);ctx.stroke();}
 function stop(reset=false){playSerial++;if(playback){clearInterval(playback.timer);for(const o of playback.nodes)try{o.stop();}catch{}playback=null;}cancelAnimationFrame(raf);$('stop').disabled=true;if(reset){$('seek').value=0;draw(0);}}
-async function play(track,from){stop();const serial=playSerial;if(!track.notes.length)throw Error('試聴できる音符がありません');audio??=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();if(serial!==playSerial)return;if(!master){master=audio.createGain();master.connect(audio.destination);}master.gain.value=+$('volume').value*.22;setDisplay(track);from=from>=track.duration?0:Math.max(0,from||0);const state={nodes:new Set(),base:audio.currentTime+.06-from,track,index:0};playback=state;$('stop').disabled=false;
- while(state.index<track.notes.length&&track.notes[state.index].end<=from)state.index++;
- function schedule(){if(playback!==state)return;const now=audio.currentTime,horizon=now+.3;while(state.index<track.notes.length){const n=track.notes[state.index];if(state.base+n.start>horizon)break;state.index++;if(state.base+n.end<=now)continue;const start=Math.max(now+.005,state.base+n.start),end=state.base+n.end;if(end<=start)continue;const o=audio.createOscillator(),g=audio.createGain(),kind=$('wave').value;o.type=kind==='piano'?'triangle':kind;o.frequency.value=440*Math.pow(2,(n.pitch-69)/12);const amp=n.velocity/127;g.gain.setValueAtTime(0,start);g.gain.linearRampToValueAtTime(amp,Math.min(start+.004,end));if(kind==='piano')g.gain.exponentialRampToValueAtTime(Math.max(.01,amp*.2),Math.max(start+.004,end-.003));g.gain.setValueAtTime(kind==='piano'?Math.max(.01,amp*.2):amp,Math.max(start,end-.003));g.gain.linearRampToValueAtTime(0,end);o.connect(g);g.connect(master);o.start(start);o.stop(end+.002);state.nodes.add(o);o.onended=()=>{state.nodes.delete(o);o.disconnect();g.disconnect();};}}
- schedule();state.timer=setInterval(schedule,80);function animate(){if(playback!==state)return;const p=Math.max(0,audio.currentTime-state.base);$('seek').value=p;$('clock').textContent=fmt(p)+' / '+fmt(track.duration);draw(p);if(p>=track.duration){stop();return;}raf=requestAnimationFrame(animate);}animate();
+async function play(track,from){
+ stop();const serial=playSerial;if(!track.notes.length)throw Error('試聴できる音符がありません');
+ audio??=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();if(serial!==playSerial)return;
+ if(!master){master=audio.createGain();master.connect(audio.destination);}master.gain.value=+$('volume').value*.22;
+ setDisplay(track);from=from>=track.duration?0:Math.max(0,from||0);
+ const state={nodes:new Set(),base:audio.currentTime+.06,track,from,scheduled:0};playback=state;$('stop').disabled=false;
+ function schedule(){if(playback!==state)return;const now=audio.currentTime,high=Math.max(0,now-state.base+.3);
+  const events=Core.previewEvents(track,from,state.scheduled,high);state.scheduled=high;
+  for(const n of events){const start=Math.max(now+.005,state.base+n.start),end=state.base+n.end;if(end<=start)continue;
+   const o=audio.createOscillator(),g=audio.createGain(),kind=$('wave').value;o.type=kind==='piano'?'triangle':kind;o.frequency.value=440*Math.pow(2,(n.pitch-69)/12);const amp=n.velocity/127;
+   g.gain.setValueAtTime(0,start);g.gain.linearRampToValueAtTime(amp,Math.min(start+.004,end));if(kind==='piano')g.gain.exponentialRampToValueAtTime(Math.max(.01,amp*.2),Math.max(start+.004,end-.003));g.gain.setValueAtTime(kind==='piano'?Math.max(.01,amp*.2):amp,Math.max(start,end-.003));g.gain.linearRampToValueAtTime(0,end);
+   o.connect(g);g.connect(master);o.start(start);o.stop(end+.002);state.nodes.add(o);o.onended=()=>{state.nodes.delete(o);o.disconnect();g.disconnect();};
+  }
+ }
+ schedule();state.timer=setInterval(schedule,80);
+ function animate(){if(playback!==state)return;const elapsed=Math.max(0,audio.currentTime-state.base),p=Core.previewPosition(track,from,elapsed);$('seek').value=p;$('clock').textContent=fmt(p)+' / '+fmt(track.duration)+(track.loop?' ↻':'');draw(p);if(!track.loop&&from+elapsed>=track.duration){stop();return;}raf=requestAnimationFrame(animate);}animate();
 }
+
 function act(fn){return async()=>{try{await fn();}catch(e){stop();status(e.message,true);}};}
 $('file').onchange=act(async()=>{const f=$('file').files[0];if(!f)return;stop(true);const serial=++loadSerial;midi=null;result=null;$('channel').disabled=true;$('convert').disabled=true;$('playMidi').disabled=true;$('playMml').disabled=true;$('save').disabled=true;$('saveMdx').disabled=true;$('mml').value='';const parsed=Core.readMidi(await f.arrayBuffer());if(serial!==loadSerial)return;midi=parsed;$('channel').replaceChildren();for(let i=0;i<16;i++){const n=midi.channels[i].notes.length;if(n){const o=document.createElement('option');o.value=i;o.textContent=`CH ${i+1} — ${n} notes`;$('channel').append(o);}}if(!$('channel').options.length)throw Error('ノートのあるチャンネルがありません');$('channel').disabled=false;$('convert').disabled=false;$('playMidi').disabled=false;$('fileInfo').textContent=`${f.name} / Format ${midi.format} / ${midi.tracks} track / ${midi.ppq} PPQ`;$('stats').replaceChildren();setDisplay(midiTrack());status('チャンネルと出力パートを選び、変換してください。');});
 $('channel').onchange=act(()=>{stop(true);setDisplay(midiTrack());status('チャンネルを変更しました。変換ボタンでMMLを更新してください。');});
-$('convert').onclick=act(()=>{if(!midi)return;stop(true);result=Core.generate(midi,+$('channel').value,{parts:$('parts').value,sustain:$('sustain').checked,retrigger:$('retrigger').checked,pdx:$('pdx').value,bank:$('bank').value,quantize:$('quantize').value,volumeOffset:$('volumeOffset').value});$('mml').value=result.text;const parsed=Core.parseMml(result.text);if(parsed.notes.length!==result.notes)throw Error('内部検証: ノート数不一致');$('playMml').disabled=false;$('save').disabled=false;$('saveMdx').disabled=false;$('stats').replaceChildren();for(const [v,label]of [[result.notes,'notes'],[result.parts.length,'parts'],[result.stolen,'古い音を終了'],[result.retriggers,'同音対策'],[result.skipped,'0クロック省略']]){const el=document.createElement('div');el.className='stat';const b=document.createElement('b');b.textContent=v;el.append(b,document.createTextNode(label));$('stats').append(el);}setDisplay(Core.secondsTrack(parsed));$('compile').textContent=result.parts.some(p=>p>='P')?'コンパイル例: note -p output.mml（対応PCMドライバとPDXが必要）':'コンパイル例: note output.mml';status(`変換完了。音量オフセット ${result.volumeOffset}。${result.quantization?'クオンタイズ：開始シフト '+result.quantization.shift+'クロック、平均補正 '+result.quantization.mean.toFixed(3)+'クロック。':'クオンタイズ無効。'}0クロックの音を${result.skipped}音省略しました。${result.rounded}音の時刻を48 PPQへ丸めました。${midi.channels[+$('channel').value].unclosed?'終端のない音符はMIDI終端で終了しました。':''}`);});
+$('convert').onclick=act(()=>{if(!midi)return;stop(true);result=Core.generate(midi,+$('channel').value,{parts:$('parts').value,sustain:$('sustain').checked,retrigger:$('retrigger').checked,pdx:$('pdx').value,bank:$('bank').value,useLoop:$('useLoop').checked,quantize:$('quantize').value,volumeOffset:$('volumeOffset').value});$('mml').value=result.text;const parsed=Core.parseMml(result.text);if(parsed.notes.length!==result.notes)throw Error('内部検証: ノート数不一致');$('playMml').disabled=false;$('save').disabled=false;$('saveMdx').disabled=false;$('stats').replaceChildren();for(const [v,label]of [[result.notes,'notes'],[result.parts.length,'parts'],[result.stolen,'古い音を終了'],[result.retriggers,'同音対策'],[result.skipped,'0クロック省略']]){const el=document.createElement('div');el.className='stat';const b=document.createElement('b');b.textContent=v;el.append(b,document.createTextNode(label));$('stats').append(el);}setDisplay(Core.secondsTrack(parsed));$('compile').textContent=result.parts.some(p=>p>='P')?'コンパイル例: note -p output.mml（対応PCMドライバとPDXが必要）':'コンパイル例: note output.mml';status(`変換完了。${result.loop?'ループ '+result.loop.start+'～'+result.loop.end+'クロック。':$('useLoop').checked?'ループマーカーなし。':''}音量オフセット ${result.volumeOffset}。${result.quantization?'クオンタイズ：開始シフト '+result.quantization.shift+'クロック、平均補正 '+result.quantization.mean.toFixed(3)+'クロック。':'クオンタイズ無効。'}0クロックの音を${result.skipped}音省略しました。${result.rounded}音の時刻を48 PPQへ丸めました。${midi.channels[+$('channel').value].unclosed?'終端のない音符はMIDI終端で終了しました。':''}`);});
 $('playMidi').onclick=act(()=>play(midiTrack(),+$('seek').value));$('playMml').onclick=act(()=>play(Core.secondsTrack(Core.parseMml($('mml').value)),+$('seek').value));$('stop').onclick=()=>stop(true);
 $('seek').oninput=()=>{const p=+$('seek').value;if(playback){const track=playback.track;stop();play(track,p).catch(e=>status(e.message,true));}else{draw(p);$('clock').textContent=fmt(p)+' / '+fmt(display?.duration);}};
 $('volume').oninput=()=>{if(master)master.gain.setTargetAtTime(+$('volume').value*.22,audio.currentTime,.01);};
 $('mml').oninput=()=>{stop();$('playMml').disabled=!$('mml').value.trim();$('save').disabled=!$('mml').value.trim();$('saveMdx').disabled=!$('mml').value.trim();status('MMLを編集しました。MML試聴は現在のテキストを読み込みます。');};
 $('save').onclick=act(()=>{Core.parseMml($('mml').value);const blob=new Blob([$ ('mml').value.replace(/\r?\n/g,'\r\n')],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ch'+(+$('channel').value+1)+'_'+(result?.parts.join('')||'edited')+'.mml';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});
 $('saveMdx').onclick=act(()=>{const compiled=Core.compilePcmMdx($('mml').value);const blob=new Blob([compiled.bytes],{type:'application/octet-stream'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ch'+(+$('channel').value+1)+'_'+compiled.parts.join('')+'.mdx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);status('MDXを保存しました（'+compiled.bytes.length+'バイト、'+compiled.noteCount+'音符、拡張PCM '+compiled.parts.join('')+'）。'+(compiled.pdx?'PDX: '+compiled.pdx:'PDX名が未指定です。PCM再生にはPDX名を指定して再変換してください。')+' 対応PCMドライバとPDXは別途必要です。');});
-for(const id of ['parts','sustain','retrigger','pdx','bank','quantize','volumeOffset'])$(id).addEventListener('change',()=>{stop(true);status('設定を変更しました。変換ボタンでMMLを更新してください。');});
+for(const id of ['parts','sustain','retrigger','pdx','bank','quantize','volumeOffset','useLoop'])$(id).addEventListener('change',()=>{stop(true);status('設定を変更しました。変換ボタンでMMLを更新してください。');});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});window.addEventListener('pagehide',()=>{stop();audio?.close();});
 </script></html>
